@@ -21,6 +21,9 @@
         },
       };
     </script>
+
+    <!-- Spline Viewer (3D embed) -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer/build/spline-viewer.js"></script>
   </head>
 
   <body class="min-h-dvh bg-slate-950 text-slate-100 antialiased">
@@ -34,6 +37,35 @@
         <span class="hidden sm:inline">Dark mode</span>
         <span class="sm:hidden">DM</span>
       </button>
+    </div>
+
+    <!-- Welcome overlay -->
+    <div
+      id="welcome-overlay"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm transition-opacity duration-700 opacity-100"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcome-title"
+    >
+      <div class="mx-auto w-full max-w-md px-6 text-center">
+        <h2
+          id="welcome-title"
+          class="text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl"
+        >
+          Welcome
+        </h2>
+        <p class="mt-2 text-sm text-slate-300 sm:text-base">
+          Your link tree is loading...
+        </p>
+
+        <button
+          id="enter-button"
+          type="button"
+          class="mt-6 inline-flex items-center justify-center rounded-full bg-slate-100 px-5 py-2.5 text-sm font-medium text-slate-900 shadow-lg transition hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70"
+        >
+          Click to Enter
+        </button>
+      </div>
     </div>
 
     <!-- Background -->
@@ -52,7 +84,25 @@
       ></div>
     </div>
 
-    <main class="mx-auto flex min-h-dvh max-w-xl items-center px-5 py-10">
+    <!-- 3D background -->
+    <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div
+        id="spline-wrap"
+        class="relative h-full w-full transform-gpu will-change-transform"
+      >
+        <!-- Replace url with your own Spline export URL -->
+        <spline-viewer
+          url="https://prod.spline.design/S8o9DE-254xyJ0lv/scene.splinecode"
+          style="position: absolute; inset: 0; width: 100%; height: 100%"
+          background="transparent"
+        ></spline-viewer>
+      </div>
+    </div>
+
+    <main
+      id="link-tree"
+      class="relative z-10 mx-auto flex min-h-dvh max-w-xl items-center px-5 py-10 opacity-0 translate-y-8 transition-all duration-700 ease-out"
+    >
       <section
         class="w-full rounded-3xl border border-white/10 bg-white/5 p-6 shadow-glow backdrop-blur sm:p-8"
         aria-label="Personal link page"
@@ -209,6 +259,10 @@
         const body = document.body;
         const themeToggle = document.getElementById("theme-toggle");
         const contactButton = document.getElementById("contact-button");
+        const welcomeOverlay = document.getElementById("welcome-overlay");
+        const enterButton = document.getElementById("enter-button");
+        const linkTree = document.getElementById("link-tree");
+        const splineWrap = document.getElementById("spline-wrap");
 
         function applyTheme(isLight) {
           if (isLight) {
@@ -246,6 +300,56 @@
               "Thanks for reaching out! You can contact me at: your-email@example.com"
             );
           });
+        }
+
+        // Welcome -> fade out overlay + slide up link tree
+        if (welcomeOverlay && enterButton && linkTree) {
+          enterButton.addEventListener("click", () => {
+            welcomeOverlay.classList.add("opacity-0", "pointer-events-none");
+            // Slide up existing structure after overlay starts fading out
+            linkTree.classList.remove("translate-y-8", "opacity-0");
+            linkTree.classList.add("translate-y-0", "opacity-100");
+
+            // Remove overlay from layout/tab order after transition
+            window.setTimeout(() => {
+              welcomeOverlay.classList.add("hidden");
+            }, 750);
+          });
+        }
+
+        // Subtle mouse-follow interaction for the 3D element
+        if (splineWrap && !("ontouchstart" in window)) {
+          let targetX = 0;
+          let targetY = 0;
+          let currentX = 0;
+          let currentY = 0;
+
+          const maxTranslate = 10; // px
+          const maxRotate = 6; // deg
+
+          window.addEventListener(
+            "mousemove",
+            (event) => {
+              const x = event.clientX / window.innerWidth - 0.5;
+              const y = event.clientY / window.innerHeight - 0.5;
+              targetX = x;
+              targetY = y;
+            },
+            { passive: true }
+          );
+
+          const animate = () => {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+
+            splineWrap.style.transform = `translate3d(${currentX * maxTranslate}px, ${currentY * maxTranslate}px, 0) rotateX(${(-currentY * maxRotate).toFixed(
+              2
+            )}deg) rotateY(${(currentX * maxRotate).toFixed(2)}deg)`;
+
+            window.requestAnimationFrame(animate);
+          };
+
+          window.requestAnimationFrame(animate);
         }
       });
     </script>
