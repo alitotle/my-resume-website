@@ -24,6 +24,18 @@
   </head>
 
   <body class="min-h-dvh bg-slate-950 text-slate-100 antialiased">
+    <div class="fixed inset-x-0 top-0 z-10 flex justify-end px-5 py-4">
+      <button
+        id="theme-toggle"
+        type="button"
+        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-xs font-medium text-slate-100 shadow-sm backdrop-blur hover:border-white/30 hover:bg-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
+      >
+        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+        <span class="hidden sm:inline">Dark mode</span>
+        <span class="sm:hidden">DM</span>
+      </button>
+    </div>
+
     <!-- Background -->
     <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div
@@ -62,8 +74,19 @@
             Coding Learner
           </h1>
           <p class="mt-2 text-sm leading-relaxed text-slate-300 sm:text-base">
-            Building projects, learning daily, and sharing my journey in software development.
+            Building projects, learning daily, and sharing my journey in software
+            development.
           </p>
+
+          <div class="mt-4 flex justify-center">
+            <button
+              id="contact-button"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-full border border-cyan-400/70 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-100 shadow-sm backdrop-blur hover:bg-cyan-400/20 hover:border-cyan-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70"
+            >
+              <span>Contact Me</span>
+            </button>
+          </div>
         </header>
 
         <div class="mt-7 space-y-3">
@@ -180,6 +203,52 @@
         </footer>
       </section>
     </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const body = document.body;
+        const themeToggle = document.getElementById("theme-toggle");
+        const contactButton = document.getElementById("contact-button");
+
+        function applyTheme(isLight) {
+          if (isLight) {
+            body.classList.add("light-mode");
+            body.classList.remove("bg-slate-950", "text-slate-100");
+            body.classList.add("bg-slate-50", "text-slate-900");
+            if (themeToggle) {
+              const labelSpan = themeToggle.querySelector("span:nth-child(2)");
+              if (labelSpan) labelSpan.textContent = "Light mode";
+            }
+          } else {
+            body.classList.remove("light-mode");
+            body.classList.remove("bg-slate-50", "text-slate-900");
+            body.classList.add("bg-slate-950", "text-slate-100");
+            if (themeToggle) {
+              const labelSpan = themeToggle.querySelector("span:nth-child(2)");
+              if (labelSpan) labelSpan.textContent = "Dark mode";
+            }
+          }
+        }
+
+        let isLight = false;
+        applyTheme(isLight);
+
+        if (themeToggle) {
+          themeToggle.addEventListener("click", () => {
+            isLight = !isLight;
+            applyTheme(isLight);
+          });
+        }
+
+        if (contactButton) {
+          contactButton.addEventListener("click", () => {
+            alert(
+              "Thanks for reaching out! You can contact me at: your-email@example.com"
+            );
+          });
+        }
+      });
+    </script>
   </body>
 </html>
 
